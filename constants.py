@@ -34,7 +34,7 @@ MOVEFILES = False
 REMOVEFROMLIB = False
 UPDATEINFO = False
 
-DUPESDIRECTORY = Path.Combine("C:\\","__dupes__")
+DUPESDIRECTORY = Path.Combine("H:\\","Sys","DupeQ")
 
 C2C_NOADS_GAP = 5          # Difference of pages between c2c and noads
 SIZEMARGIN = 0             # Preserve comics within sizemargin % size
@@ -43,12 +43,13 @@ COVERPAGES = 4             # Minimal number of pages to be considered "covers on
 VERBOSE = False            # Logging level (true/false)
 DEBUG = False              # Logging level (true/false)
 
+SUMMARY = False             # Show Completion Dialogs on every Run (true/false)
 
 #
 ############   DON'T MODIFY BELOW THIS LINE ######
 #
 
-VERSION= "0.9"
+VERSION= "0.9.1"
 
 SCRIPTDIRECTORY = __file__[0:-len("constants.py")]
 RULESFILE = Path.Combine(SCRIPTDIRECTORY, "dmrules.dat")

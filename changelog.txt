@@ -1,3 +1,6 @@
+v0.9.1 ->
+   Added: added ability to turn off summary dialogs.
+
 v0.9 ->
 
    Added:    - New rules: 

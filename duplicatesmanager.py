@@ -124,7 +124,8 @@ def ProcessDuplicates(books, logfile):
                "debug":DEBUG,
                "sizemargin":SIZEMARGIN,
                "coverpages":COVERPAGES,
-               "c2c_noads_gap":C2C_NOADS_GAP}
+               "c2c_noads_gap":C2C_NOADS_GAP,
+               "summary":SUMMARY}
                    
     ########################################
     #
@@ -263,9 +264,10 @@ def ProcessDuplicates(books, logfile):
     
     # fix for issue 4 - if there are no dupes, end gracefully
     if len(dupe_groups) == 0:
-        MessageBox.Show('Script execution completed: No duplicates found in the comics selected', 'Success', MessageBoxButtons.OK, MessageBoxIcon.Information)
+        if options["summary"]:
+            MessageBox.Show('Script execution completed: No duplicates found in the comics selected', 'Success', MessageBoxButtons.OK, MessageBoxIcon.Information)
         logfile.write('\n\n\n\ ########################################################### \n\n\n')
-        logfile.write('Scritp execution completed: No duplicates found in the comics selected')
+        logfile.write('Script execution completed: No duplicates found in the comics selected')
         
         del dupe_groups
         del new_groups
@@ -324,8 +326,8 @@ def ProcessDuplicates(books, logfile):
     ###########################################################
 
 #### End report
-
-    MessageBox.Show('Script execution completed correctly on: '+ str(len(books))+ ' books.\n - '+str(len(dupe_groups))+' duplicated groups processed.\n - '+str(len(new_groups))+' duplicated groups remain.\n - '+str(remain_comics)+' comics remain', 'Success', MessageBoxButtons.OK, MessageBoxIcon.Information)
+    if options["summary"]:
+        MessageBox.Show('Script execution completed correctly on: '+ str(len(books))+ ' books.\n - '+str(len(dupe_groups))+' duplicated groups processed.\n - '+str(len(new_groups))+' duplicated groups remain.\n - '+str(remain_comics)+' comics remain', 'Success', MessageBoxButtons.OK, MessageBoxIcon.Information)
     logfile.write('\n\n\n\ ########################################################### \n\n\n')
     logfile.write('Script execution completed correctly on: '+ str(len(books))+ ' books.\n'+str(len(dupe_groups))+' duplicated groups processed.\n'+str(len(new_groups))+' duplicated groups remain..\n'+str(remain_comics)+' comics remain')
 
@@ -378,7 +380,7 @@ def LoadRules(logfile, options):
         logfile.write('\tLine ' + str(rule[0]) + ': ' + str(rule[2:]) + '\n')
     logfile.write('\n')
       
-    bool_options = ("movefiles", "removefromlib", "updateinfo", "verbose", "debug")
+    bool_options = ("movefiles", "removefromlib", "updateinfo", "verbose", "debug", "summary")
     int_options = ("sizemargin", "coverspages", "c2c_noads_gap")
 
     
