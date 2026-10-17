@@ -6,7 +6,7 @@
 ##
 ##      Copyleft perezmu 2011. 
 ##
-##        Detailed credits: "http://code.google.com/p/comicrack-duplicates-manager/wiki/FellowCredits"
+##        Detailed credits: "https://github.com/frcooper/comicrack-duplicates-manager/blob/main/docs/FellowCredits.md"
 ##
 ######################################################################################################
 

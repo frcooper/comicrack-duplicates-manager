@@ -24,7 +24,7 @@ from System.IO import Path, Directory, File, FileInfo
 #
 #############   **** USER CONFIGURABLE VARIABLES ***    ###########################################
 #
-#          see http://code.google.com/p/comicrack-duplicates-manager/wiki/UserConfiguration for details
+#          see https://github.com/frcooper/comicrack-duplicates-manager/blob/main/docs/UserConfiguration.md for details
 #
 #          These may also be set in the "dmrules.dat" rules file using this syntax:  "@ OPTION VALUE". Values
 #           found in the "dmrules.dat" file override the defaults set in this file.
