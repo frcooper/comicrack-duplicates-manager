@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Plugin package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build
+        run: python3 -B tools/build-plugin.py
+      - uses: actions/upload-artifact@v7
+        with:
+          name: DuplicatesManager-plugin
+          path: dist/*.crplugin
+          if-no-files-found: error

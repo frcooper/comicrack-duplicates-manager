@@ -1,0 +1,59 @@
+name: Release
+
+# Pushing a version tag (0.9.2 or v0.9.2) builds the .crplugin and publishes it as a
+# GitHub release, with notes from that version's changelog.txt entry. For a tag that
+# predates this workflow (0.9.1), run it by hand with the tag: it rebuilds the tag
+# with the current build script and attaches the package to the existing release.
+on:
+  push:
+    tags: ["[0-9]*.[0-9]*", "v[0-9]*.[0-9]*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to build and release, e.g. 0.9.1
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # The build script comes from this run's commit, the plugin from the tag.
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          path: src
+      - name: Build
+        run: |
+          python3 -B tools/build-plugin.py --source src --version "$TAG"
+          cd dist && sha256sum *.crplugin > SHA256SUMS && cat SHA256SUMS
+      - name: Release notes
+        run: |
+          version="${TAG#v}"
+          # The entry runs from its "v<version> ->" heading to the next one.
+          tr -d '\r' < src/changelog.txt | awk -v head="v$version" '
+            /^v[0-9][^ ]* ->/ { if (found) exit; found = ($1 == head); next }
+            found' | sed -e '/./,$!d' > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::warning::No changelog.txt entry for v$version"
+            echo "Duplicates Manager $version" > notes.md
+          fi
+          cat notes.md
+      - name: Publish
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.crplugin dist/SHA256SUMS --clobber
+          else
+            gh release create "$TAG" dist/*.crplugin dist/SHA256SUMS \
+              --verify-tag --title "v${TAG#v}" --notes-file notes.md
+          fi
