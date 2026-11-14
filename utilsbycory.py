@@ -29,6 +29,7 @@ def cleanupseries(series_name):
     series_name = series_name.replace('-', ' ')
     series_name = series_name.replace("'", ' ')
     series_name = series_name.replace(":", ' ')
+    series_name = series_name.replace(",", ' ')
     series_name = re.sub(r'\b(vs\.?|versus|and|or|the|an|of|a|is)\b','', series_name)
     series_name = re.sub(r'giantsize', r'giant size', series_name)
     series_name = re.sub(r'giant[- ]*sized', r'giant size', series_name)
@@ -77,7 +78,7 @@ def convertnumberwords(phrase_s, expand_b):
          phrase_s = re.sub(b+y+b, x, phrase_s);
       phrase_s = re.sub(r'\btwelfth\b', '12th', phrase_s);
       phrase_s = re.sub(r'\beightteenth\b', '18th', phrase_s);
-   return phrase_s
+   return phrase_s
 
 
 
@@ -87,7 +88,9 @@ import System
 
 
 def ToString(v):
+    # Keep the text as Unicode: encoding it to the Windows code page turned every
+    # character the code page lacks into '?', which broke non-ASCII series and file names.
     if v is None:
         return ''
-    return unicode(v).encode(System.Text.Encoding.Default.BodyName, 'replace')
+    return unicode(v)
 

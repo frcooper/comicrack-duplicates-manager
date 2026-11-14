@@ -17,6 +17,7 @@
 #    Import section
 
 import sys, traceback
+import codecs
 import re
 import clr
 import System
@@ -68,7 +69,8 @@ def DuplicatesManager(books):
             MessageBox.Show('ERROR: '+ str(ex), "ERROR creating dump directory" + DUPESDIRECTORY, MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
             return
     
-    logfile = open(LOGFILE,'w')
+    # UTF-8, so series and file names that aren't ASCII can be logged.
+    logfile = codecs.open(LOGFILE, 'w', 'utf-8')
     logfile.write('COMICRACK DUPLICATES MANAGER V '+VERSION+'\n\n')
     ''' Logfile initialized '''
     
