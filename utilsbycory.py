@@ -81,14 +81,15 @@ def convertnumberwords(phrase_s, expand_b):
 
 
 
-
 ### Other util methods
 
 import System
 
 
 def ToString(v):
+    # Keep the text as Unicode: encoding it to the Windows code page turned every
+    # character the code page lacks into '?', which broke non-ASCII series and file names.
     if v is None:
         return ''
-    return unicode(v).encode(System.Text.Encoding.Default.BodyName, 'replace')
+    return unicode(v)
 
