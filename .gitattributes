@@ -1,0 +1,7 @@
+# Text is stored with LF and checked out with CRLF everywhere, Windows and WSL alike,
+# so an editor that writes LF doesn't rewrite a whole file.
+* text=auto eol=crlf
+
+*.jpg binary
+*.png binary
+*.xcf binary
