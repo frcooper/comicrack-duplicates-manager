@@ -1,0 +1,5 @@
+# Commits that only change formatting: git blame skips them (GitHub's Blame view reads this file).
+# For local blame, run once: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# chore: store text with LF and check it out with CRLF (#3)
+a0a4c9968e09d7946a0b8d88d2a5dc5bf8fb6fcc
