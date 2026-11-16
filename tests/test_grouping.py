@@ -8,16 +8,17 @@ from dmGrouping import find_dupe_groups  # noqa: E402
 
 
 class Book(object):
-    def __init__(self, title):
+    def __init__(self, title, bw='Unknown'):
         self.Title = title
+        self.BlackAndWhite = bw
 
 
-def comic(series, number, cvdb='', name=None, title=''):
+def comic(series, number, cvdb='', name=None, title='', bw='Unknown'):
     # Same layout as the tuples ProcessDuplicates builds (constants.py):
     # SERIES, NUMBER, VOLUME, FILENAME, PAGECOUNT, FILESIZE, ID, CVDB_ID,
     # FILEPATH, TAGS, NOTES, FILETYPE, SCAN, BOOK
     name = name or '%s %s %s' % (series, number, cvdb)
-    return (series, number, '', name, 20, 1.0, name, cvdb, name, '', '', 'cbz', '', Book(title))
+    return (series, number, '', name, 20, 1.0, name, cvdb, name, '', '', 'cbz', '', Book(title, bw))
 
 
 def names(groups):
@@ -71,6 +72,34 @@ class FindDupeGroupsTest(unittest.TestCase):
 
     def test_unnumbered_comics_still_group_by_comicvine_id(self):
         groups = find_dupe_groups([comic('x', '', '5', 'a', 'One'), comic('y', '', '5', 'b', 'Two')])
+        self.assertEqual(names(groups), [['a', 'b']])
+
+    def test_cover_variants_sharing_an_id_stay_apart(self):
+        # variants are often scraped to the plain issue's id
+        groups = find_dupe_groups([
+            comic('slingers', '1', '7', 'a'), comic('slingers', '01', '7', 'a2'),
+            comic('slingers', '1A', '7', 'b'), comic('slingers', '1a', '7', 'b2'),
+            comic('slingers', '1B', '7', 'c'), comic('slingers', '1C', '7', 'd'),
+        ])
+        self.assertEqual(names(groups), [['a', 'a2'], ['b', 'b2']])
+
+    def test_unnumbered_copy_still_joins_by_id(self):
+        groups = find_dupe_groups([comic('x', '1', '5', 'a'), comic('x', '', '5', 'b')])
+        self.assertEqual(names(groups), [['a', 'b']])
+
+    def test_leading_zeros_and_decimal_zero_match_by_name(self):
+        groups = find_dupe_groups([comic('x', '1', name='a'), comic('x', '001', name='b'), comic('x', '1.0', name='c')])
+        self.assertEqual(names(groups), [['a', 'b', 'c']])
+
+    def test_black_and_white_edition_stays_apart(self):
+        groups = find_dupe_groups([
+            comic('walking dead', '1', '9', 'colour'), comic('walking dead', '1', '', 'colour2'),
+            comic('walking dead', '1', '9', 'bw', bw='Yes'), comic('walking dead', '1', '', 'bw2', bw='Yes'),
+        ])
+        self.assertEqual(names(groups), [['bw', 'bw2'], ['colour', 'colour2']])
+
+    def test_unknown_and_no_count_as_colour(self):
+        groups = find_dupe_groups([comic('x', '1', name='a', bw='No'), comic('x', '1', name='b')])
         self.assertEqual(names(groups), [['a', 'b']])
 
 
