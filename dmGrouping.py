@@ -16,6 +16,15 @@
 # When several different ids share a series key and number, only the unscraped
 # copies are grouped with each other, since nothing says which issue they are.
 # Comics without a number also need the same title to be grouped by name.
+# Two things keep apart comics that would otherwise match:
+#   - a cover variant: a number with a letter suffix (1A, 1B, ...) is often
+#     scraped to the plain issue's ComicVine id, so the id only joins comics
+#     whose numbers carry the same suffix;
+#   - a black and white edition only matches another black and white copy.
+
+import re
+
+_number_parts = re.compile(r'^(-?)0*(\d+)(?:\.0+)?(.*)$')
 
 # Positions in the comic tuples built by ProcessDuplicates (see constants.py).
 SERIES, NUMBER, CVDB_ID = 0, 1, 7
@@ -31,15 +40,35 @@ def _cvdb(comic, cvdb_index):
     return value
 
 
+def _number_key(number):
+    '''Normalised number: "01" and "1.0" are "1", "1A" is "1a".'''
+    number = ('%s' % (number or '')).strip().lower()
+    m = _number_parts.match(number)
+    if m:
+        return m.group(1) + m.group(2) + m.group(3).strip()
+    return number
+
+
+def _variant(number):
+    '''The suffix that marks a cover variant: "a" for "1A", "" for "1" or no number.'''
+    m = _number_parts.match(_number_key(number))
+    return m.group(3) if m else ''
+
+
+def _bw(comic):
+    # The ComicBook's BlackAndWhite is a YesNo enum: Unknown, No or Yes.
+    return '%s' % getattr(comic[-1], 'BlackAndWhite', '') == 'Yes'
+
+
 def _name_key(comic, series_index, number_index):
     # Without a number, series alone says little (folios, artbooks and one-shots
     # filed under a folder name all share it), so the title must match too.
     # The ComicBook is the tuple's last item.
-    number = comic[number_index]
+    number = _number_key(comic[number_index])
     if number:
-        return (comic[series_index], number)
+        return (comic[series_index], number, _bw(comic))
     title = getattr(comic[-1], 'Title', None) or ''
-    return (comic[series_index], '', title.strip().lower())
+    return (comic[series_index], '', title.strip().lower(), _bw(comic))
 
 
 def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_index=CVDB_ID):
@@ -63,7 +92,8 @@ def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_inde
     by_name = {}
     for i, comic in enumerate(comics):
         if ids[i]:
-            by_id.setdefault(ids[i], []).append(i)
+            key = (ids[i], _variant(comic[number_index]), _bw(comic))
+            by_id.setdefault(key, []).append(i)
         by_name.setdefault(_name_key(comic, series_index, number_index), []).append(i)
 
     for members in by_id.values():

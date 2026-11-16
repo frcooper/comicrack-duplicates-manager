@@ -77,3 +77,16 @@ There are a series of parameters you can configure. See [UserConfiguration](User
 Select your comics in Comicrack, launch the script, and pray! The `logfile.log` file in the dump directory will tell you what happened!
 
 See [TipsAndTricks](TipsAndTricks.md) for further help! And you can check also the threat in ComicRack for further discussion Discussion is provided in the ([comicrack support forum, archived](https://web.archive.org/web/20161013114923/http://comicrack.cyolito.com/forum/13-scripts/12076-duplicates-manager)).
+
+## Smart-list rules ##
+
+The plugin also adds two rules for smart lists, under **User Scripts**. They group books the same way the manager does, but only list them, so you can look before anything is moved or deleted:
+
+- **Duplicates: same issue** lists every book that has another copy of the same issue: the same ComicVine id, or the same series, volume and number.
+- **Duplicates: extra copies only** lists the same books minus the copy to keep in each group. It keeps the scraped copy first, then the higher page resolution (when ComicRack knows it for every copy), then more pages, then the bigger file. This is a rough guide, not a quality check.
+
+Cover variants (#1A, #1B, ...) are kept apart from the plain issue even when they share its ComicVine id, and a black and white edition only matches other black and white copies.
+
+A rule only sees the books that the rules above it let through. Put every exclusion (paths, tags, ...) above the duplicates rule, never below it: a rule below would remove one copy of a pair and leave the other on its own.
+
+These rules replace the separate DuplicateIssues script, which used the same rule names. Remove that script if you have it installed.
