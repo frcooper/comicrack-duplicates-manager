@@ -9,8 +9,10 @@ constants.py disagree with it or with each other.
 
 dmrules.dat is not shipped: the demo rules turn on MOVEFILES and REMOVEFROMLIB,
 and the script must only log until the user writes their own rules file.
-Package.ini lists dmrules.dat under KeepFiles, so ComicRack keeps that file
-across upgrades.
+The script reads the user's rules from ComicRack's PluginData folder (see
+dmPaths.py), which uninstalling doesn't touch. Package.ini still lists
+dmrules.dat under KeepFiles, so a rules file left in the plugin folder by an
+older version survives an upgrade until the script copies it out.
 """
 from pathlib import Path
 import argparse
