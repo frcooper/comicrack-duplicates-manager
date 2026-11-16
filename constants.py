@@ -49,7 +49,7 @@ SUMMARY = False             # Show Completion Dialogs on every Run (true/false)
 ############   DON'T MODIFY BELOW THIS LINE ######
 #
 
-VERSION= "0.9.1"
+VERSION= "0.10.0"
 
 SCRIPTDIRECTORY = __file__[0:-len("constants.py")]
 # The rules file is kept outside the plugin folder, which uninstalling deletes (see dmPaths.py).

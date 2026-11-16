@@ -1,3 +1,17 @@
+v0.10.0 ->
+   Added:    - Duplicates are grouped by ComicVine issue id first, so copies filed
+               under different series names are found. The id comes from the
+               comicvine_issue custom value or the CVDB tag/note.
+             - The dump folder can be set in dmrules.dat with
+               "@ DUPESDIRECTORY <path>", so it survives reinstalling the plugin.
+   Changed:  - dmrules.dat now lives in ComicRack's PluginData\Duplicates Manager
+               folder, so uninstalling the plugin no longer deletes it. An old one
+               in the plugin folder is copied there on the first run.
+             - Comics without a number are only grouped by name when their titles
+               also match.
+   Fixed:    - The plugin failed to start ("No module named codecs").
+             - Non-ASCII series and file names are kept intact.
+
 v0.9.1 ->
    Added: added ability to turn off summary dialogs.
 
