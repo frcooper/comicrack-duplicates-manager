@@ -17,12 +17,12 @@
 #    Import section
 
 import sys, traceback
-import codecs
 import re
 import clr
 import System
 import System.IO
-from System.IO import Path, Directory, File, FileInfo
+from System.IO import Path, Directory, File, FileInfo, StreamWriter
+from System.Text import UTF8Encoding
 
 clr.AddReference("System.Windows.Forms")
 from System.Windows.Forms import DialogResult, MessageBox, MessageBoxButtons, MessageBoxIcon
@@ -45,6 +45,25 @@ from constants import *
 
   
 ##'''---------------------------------------------------------'''
+
+
+class Utf8Log(object):
+    '''A UTF-8 text file with the write/flush/close calls the script uses.
+
+    ComicRack ships IronPython without its standard library, so the codecs
+    and io modules can't be imported; .NET's StreamWriter does the encoding.'''
+
+    def __init__(self, path):
+        self._writer = StreamWriter(path, False, UTF8Encoding(False))
+
+    def write(self, text):
+        self._writer.Write(text)
+
+    def flush(self):
+        self._writer.Flush()
+
+    def close(self):
+        self._writer.Close()
 
 
 ############
@@ -71,7 +90,7 @@ def DuplicatesManager(books):
             return
     
     # UTF-8, so series and file names that aren't ASCII can be logged.
-    logfile = codecs.open(LOGFILE, 'w', 'utf-8')
+    logfile = Utf8Log(LOGFILE)
     logfile.write('COMICRACK DUPLICATES MANAGER V '+VERSION+'\n\n')
     ''' Logfile initialized '''
     
