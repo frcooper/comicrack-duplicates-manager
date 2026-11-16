@@ -1,9 +1,11 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -14,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Tests
+        run: python3 -B -m unittest discover -s tests -v
       - name: Build
         run: python3 -B tools/build-plugin.py
       - uses: actions/upload-artifact@v7
@@ -21,3 +25,4 @@ jobs:
           name: DuplicatesManager-plugin
           path: dist/*.crplugin
           if-no-files-found: error
+          retention-days: 3
