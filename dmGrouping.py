@@ -15,6 +15,7 @@
 #     scraped to its own id, ...).
 # When several different ids share a series key and number, only the unscraped
 # copies are grouped with each other, since nothing says which issue they are.
+# Comics without a number also need the same title to be grouped by name.
 
 # Positions in the comic tuples built by ProcessDuplicates (see constants.py).
 SERIES, NUMBER, CVDB_ID = 0, 1, 7
@@ -28,6 +29,17 @@ def _cvdb(comic, cvdb_index):
     if not value or value == '0':
         return None
     return value
+
+
+def _name_key(comic, series_index, number_index):
+    # Without a number, series alone says little (folios, artbooks and one-shots
+    # filed under a folder name all share it), so the title must match too.
+    # The ComicBook is the tuple's last item.
+    number = comic[number_index]
+    if number:
+        return (comic[series_index], number)
+    title = getattr(comic[-1], 'Title', None) or ''
+    return (comic[series_index], '', title.strip().lower())
 
 
 def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_index=CVDB_ID):
@@ -52,7 +64,7 @@ def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_inde
     for i, comic in enumerate(comics):
         if ids[i]:
             by_id.setdefault(ids[i], []).append(i)
-        by_name.setdefault((comic[series_index], comic[number_index]), []).append(i)
+        by_name.setdefault(_name_key(comic, series_index, number_index), []).append(i)
 
     for members in by_id.values():
         for j in members[1:]:
