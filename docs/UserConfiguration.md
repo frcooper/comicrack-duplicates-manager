@@ -19,7 +19,7 @@
 
 Default values for options are defined in the file `constants.py` in the script directory. **If the values are changed in the `constant.py` file, then ComicRack has to be re-started for the new values to take effect**.
 
-|**As of version 0.5, the options** (except the `DUPESDIRECTORY`) **can be** 'dinamically' **set** (meaning there is no need to restart ComicRack) **using the `dmrules.dat` file.**|
+|**As of version 0.5, the options** (and, in this fork, `DUPESDIRECTORY`) **can be** 'dinamically' **set** (meaning there is no need to restart ComicRack) **using the `dmrules.dat` file.**|
 |:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
 To set an option in the `dmrules.dat` file the following syntax must be used:
@@ -58,6 +58,9 @@ These rules only accept the **True** or **False** values:
 
 ## Other Options ##
 
-As of version 0.5, this option can only be set in the **constants.py** file, not through the **dmrules.dat** file.
-
-  * **`DUPESDIRECTORY`** : Path to the dump directory where all discarded dupes will be moved,  _and the logfile (`logfile.log`) is stored_. Defaults to `C:\__dupes__`. To change to other path, use this syntax: For example `D:\MyComics\Discarded` you should set `directoryPath.Combine("D:\\","MyComics","Discarded")`
+  * **`DUPESDIRECTORY`** : Path to the dump directory where all discarded dupes will be moved,  _and the logfile (`logfile.log`) is stored_. Set it in the **dmrules.dat** file, which survives reinstalling the plugin; put the path in double quotes if it has spaces:
+```
+@  DUPESDIRECTORY  H:\Sys\DupeQ
+@  DUPESDIRECTORY  "D:\My Comics\Discarded"
+```
+  The default when the rules file doesn't set it comes from **constants.py**, which a reinstall overwrites. Defaults to `C:\__dupes__`. To change to other path, use this syntax: For example `D:\MyComics\Discarded` you should set `directoryPath.Combine("D:\\","MyComics","Discarded")`

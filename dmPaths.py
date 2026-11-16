@@ -40,3 +40,22 @@ def rules_paths(script_directory):
     else:
         folder = script_directory.rstrip('\\/')
     return _join(folder, RULESFILENAME), folder, _join(script_directory, RULESFILENAME)
+
+
+def dupes_directory(rules_lines, default):
+    '''The dump folder set in the rules file ("@ DUPESDIRECTORY <path>"), or default.
+
+    The log file goes in that folder, so it has to be known before the rules
+    are read properly. Quote a path that has spaces in it.'''
+    from dmParser import Parse
+    found = default
+    for line in Parse(rules_lines):
+        if line[2] == '@':
+            words = line[3:]
+        elif line[2][0] == '@':
+            words = [line[2][1:]] + line[3:]
+        else:
+            continue
+        if len(words) == 2 and words[0].lower() == 'dupesdirectory' and words[1].strip():
+            found = words[1].strip()
+    return found

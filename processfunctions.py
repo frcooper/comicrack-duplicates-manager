@@ -627,18 +627,19 @@ def deletecomics(options, cr, deletelist, logfile):
     
     ''' Mostly ripped form StonePawn's Libary Organizer script'''
     
-    if not Directory.Exists(DUPESDIRECTORY):
+    dupesdirectory = options["dupesdirectory"]
+    if not Directory.Exists(dupesdirectory):
         try:
-            Directory.CreateDirectory(DUPESDIRECTORY)
+            Directory.CreateDirectory(dupesdirectory)
         except Exception, ex:
-                MessageBox.Show('ERROR: '+ str(ex), "ERROR creating dump directory" + DUPESDIRECTORY, MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+                MessageBox.Show('ERROR: '+ str(ex), "ERROR creating dump directory" + dupesdirectory, MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
                 logfile.write('ERROR: '+str(ex)+'\n')
                 return
     
     for comic in deletelist:
         
         if options["movefiles"]: 
-            fullpath = Path.Combine(DUPESDIRECTORY, comic[FILENAME])
+            fullpath = Path.Combine(dupesdirectory, comic[FILENAME])
         
            #Check if the file currently exists at all
            

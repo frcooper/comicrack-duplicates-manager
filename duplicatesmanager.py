@@ -30,6 +30,7 @@ from System.Windows.Forms import DialogResult, MessageBox, MessageBoxButtons, Me
 
 from itertools import groupby
 from dmGrouping import find_dupe_groups
+from dmPaths import dupes_directory
 from dmBookWrapper import *
 from utilsbycory import cleanupseries
 from processfunctions import *
@@ -82,16 +83,23 @@ def DuplicatesManager(books):
     # Starting log file
     #
     
-    if not Directory.Exists(DUPESDIRECTORY):
+    copied = CopyOldRulesFile()
+
+    # The rules file can set the dump folder, and the log goes there.
+    dupesdirectory = DupesDirectory()
+    if not Directory.Exists(dupesdirectory):
         try:
-            Directory.CreateDirectory(DUPESDIRECTORY)
+            Directory.CreateDirectory(dupesdirectory)
         except Exception, ex:
-            MessageBox.Show('ERROR: '+ str(ex), "ERROR creating dump directory" + DUPESDIRECTORY, MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
+            MessageBox.Show('ERROR: '+ str(ex), "ERROR creating dump directory" + dupesdirectory, MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
             return
     
     # UTF-8, so series and file names that aren't ASCII can be logged.
-    logfile = Utf8Log(LOGFILE)
+    logfile = Utf8Log(Path.Combine(dupesdirectory, "logfile.log"))
     logfile.write('COMICRACK DUPLICATES MANAGER V '+VERSION+'\n\n')
+    if copied:
+        logfile.write(copied)
+    logfile.write('Dump directory: ' + dupesdirectory + '\n\n')
     ''' Logfile initialized '''
     
     #
@@ -99,7 +107,7 @@ def DuplicatesManager(books):
     #########################################
     
     try:
-        ProcessDuplicates(books, logfile)
+        ProcessDuplicates(books, logfile, dupesdirectory)
     
     except Exception, ex:
         logfile.write('\n\nSTOPPED PROCESSING BECAUSE OF EXCEPTION:\n')
@@ -111,7 +119,25 @@ def DuplicatesManager(books):
 
 
 
-def ProcessDuplicates(books, logfile):
+def CopyOldRulesFile():
+    '''Rules files from older versions sit in the plugin folder: copy one out the
+    first time, so uninstalling or reinstalling the plugin can't delete it.
+    Returns a line for the log, or None.'''
+    if File.Exists(RULESFILE) or not File.Exists(OLDRULESFILE):
+        return None
+    Directory.CreateDirectory(RULESDIRECTORY)
+    File.Copy(OLDRULESFILE, RULESFILE)
+    return 'Copied the rules file from ' + OLDRULESFILE + ' to ' + RULESFILE + '\n\n'
+
+
+def DupesDirectory():
+    '''DUPESDIRECTORY from the rules file ("@ DUPESDIRECTORY <path>"), else constants.py.'''
+    if not File.Exists(RULESFILE):
+        return DUPESDIRECTORY
+    return dupes_directory(list(File.ReadAllLines(RULESFILE)), DUPESDIRECTORY)
+
+
+def ProcessDuplicates(books, logfile, dupesdirectory):
     
     #########################################
     #
@@ -147,7 +173,8 @@ def ProcessDuplicates(books, logfile):
                "sizemargin":SIZEMARGIN,
                "coverpages":COVERPAGES,
                "c2c_noads_gap":C2C_NOADS_GAP,
-               "summary":SUMMARY}
+               "summary":SUMMARY,
+               "dupesdirectory":dupesdirectory}
                    
     ########################################
     #
@@ -293,13 +320,6 @@ def ProcessDuplicates(books, logfile):
     
 def LoadRules(logfile, options):
     
-    # Rules files from older versions sit in the plugin folder: copy one out the
-    # first time, so uninstalling or reinstalling the plugin can't delete it.
-    if not File.Exists(RULESFILE) and File.Exists(OLDRULESFILE):
-        Directory.CreateDirectory(RULESDIRECTORY)
-        File.Copy(OLDRULESFILE, RULESFILE)
-        logfile.write('Copied the rules file from ' + OLDRULESFILE + ' to ' + RULESFILE + '\n\n')
-
     # Check if file exists
     if not File.Exists(RULESFILE):
         raise NoRulesFileException('Rules File (dmrules.dat) could not be found. Create it here:\n' + RULESFILE +
@@ -369,6 +389,9 @@ def LoadRules(logfile, options):
                 options[opName] = int(opVal)
             except:
                 raise NoRulesFileException('Line ' + str(opLineNum) + ': Option "'+ opLine +'" value is invalid (integer required)')             
+                                            # path option, already applied before the log was opened
+        elif opName == "dupesdirectory":
+            pass
                                             # failure
         else:
             raise NoRulesFileException('Line ' + str(opLineNum) + ': Option "'+ opLine +'" not recognized (' + str(opName) + ')')
