@@ -30,9 +30,10 @@ Since I do not want to mess with your files & library before we are sure this th
 
 This script is an addon to comicrack that identifies duplicated ecomics and follows a set of user defined rules to remove unwanted dupes. It is designed with the 0-days in mind, but should prove useful in other scenarios.
 
-The script reads a file (**dmrules.dat**) from the directory where it is installed, that contains, both user options, and a series of rules to manage the duplicate files. Duplicate files that meet the criteria expressed in the rules are **moved** to a dump directory (not deleted) and removed from the comicrack library (default dump directory is `C:\_dupes_`). This directory also holds a logfile (**logfile.log**) that details the process followed on your comics
+The script reads a file (**dmrules.dat**) that contains, both user options, and a series of rules to manage the duplicate files. Duplicate files that meet the criteria expressed in the rules are **moved** to a dump directory (not deleted) and removed from the comicrack library (default dump directory is `C:\_dupes_`). This directory also holds a logfile (**logfile.log**) that details the process followed on your comics
 
-So, the first thing you want to do is read the rules (see [Rules Syntax](docs/RulesFileSyntax.md)) and edit your custom **dmrules.dat** file.
+So, the first thing you want to do is read the rules (see [Rules Syntax](docs/RulesFileSyntax.md)) and edit your custom **dmrules.dat** file. It lives in
+`%APPDATA%\cYo\ComicRack Community Edition\PluginData\Duplicates Manager\dmrules.dat` (a portable ComicRack uses its own `Data` folder instead of `%APPDATA%\cYo\ComicRack Community Edition`), outside the plugin folder, so uninstalling or reinstalling the plugin doesn't delete it. A `dmrules.dat` left in the plugin folder by an older version is copied there on the first run. The plugin folder has an example, `dmrules.dat.demo`.
 
 Documentation:
 

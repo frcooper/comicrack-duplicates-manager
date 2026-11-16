@@ -52,7 +52,9 @@ SUMMARY = False             # Show Completion Dialogs on every Run (true/false)
 VERSION= "0.9.1"
 
 SCRIPTDIRECTORY = __file__[0:-len("constants.py")]
-RULESFILE = Path.Combine(SCRIPTDIRECTORY, "dmrules.dat")
+# The rules file is kept outside the plugin folder, which uninstalling deletes (see dmPaths.py).
+from dmPaths import rules_paths
+RULESFILE, RULESDIRECTORY, OLDRULESFILE = rules_paths(SCRIPTDIRECTORY)
 LOGFILE = Path.Combine(DUPESDIRECTORY, "logfile.log")
 (SERIES,NUMBER,VOLUME,FILENAME,PAGECOUNT,FILESIZE,ID,CVDB_ID,FILEPATH,TAGS,NOTES,FILETYPE,SCAN,BOOK) = range(14)
 FIELD_NAMES = ['series','number','volume','filename','pages','size','id','cvdb_id','path','tags','notes','type','scan','book']

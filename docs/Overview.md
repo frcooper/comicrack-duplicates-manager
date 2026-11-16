@@ -53,7 +53,7 @@ Download from [the downloads section](https://github.com/frcooper/comicrack-dupl
 
 ## Editing Rules File ##
 
-Now you need to edit the file `dmrules.dat` that is located in this directory, to include the rules you want to use. See [RulesFileSyntax](RulesFileSyntax.md) for details. I am sorry you need to do this manually... sometime there will be a fancy windows form for this...
+Now you need to create the file `dmrules.dat` in `%APPDATA%\cYo\ComicRack Community Edition\PluginData\Duplicates Manager\dmrules.dat` (a portable ComicRack uses its own `Data` folder instead of `%APPDATA%\cYo\ComicRack Community Edition`), to include the rules you want to use (start from `dmrules.dat.demo` in the plugin folder). It lives outside the plugin folder because ComicRack deletes that folder when the plugin is uninstalled. See [RulesFileSyntax](RulesFileSyntax.md) for details. I am sorry you need to do this manually... sometime there will be a fancy windows form for this...
 
 
 ---

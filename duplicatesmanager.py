@@ -293,9 +293,18 @@ def ProcessDuplicates(books, logfile):
     
 def LoadRules(logfile, options):
     
+    # Rules files from older versions sit in the plugin folder: copy one out the
+    # first time, so uninstalling or reinstalling the plugin can't delete it.
+    if not File.Exists(RULESFILE) and File.Exists(OLDRULESFILE):
+        Directory.CreateDirectory(RULESDIRECTORY)
+        File.Copy(OLDRULESFILE, RULESFILE)
+        logfile.write('Copied the rules file from ' + OLDRULESFILE + ' to ' + RULESFILE + '\n\n')
+
     # Check if file exists
     if not File.Exists(RULESFILE):
-        raise NoRulesFileException('Rules File (dmrules.dat) could not be found in the script directory ('+ SCRIPTDIRECTORY +')')
+        raise NoRulesFileException('Rules File (dmrules.dat) could not be found. Create it here:\n' + RULESFILE +
+                                   '\n\nThe plugin folder has an example: ' + Path.Combine(SCRIPTDIRECTORY, 'dmrules.dat.demo'))
+    logfile.write('Using rules file ' + RULESFILE + '\n\n')
     
     # Read file
     f = open(RULESFILE, 'r')
