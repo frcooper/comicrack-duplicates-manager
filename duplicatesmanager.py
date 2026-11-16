@@ -29,6 +29,7 @@ from System.Windows.Forms import DialogResult, MessageBox, MessageBoxButtons, Me
 
 
 from itertools import groupby
+from dmGrouping import find_dupe_groups
 from dmBookWrapper import *
 from utilsbycory import cleanupseries
 from processfunctions import *
@@ -151,98 +152,21 @@ def ProcessDuplicates(books, logfile):
         #
         # Massage comics to get a list of dupes groups
         
-        ''' Now we group books looking for dupes! '''
-        comiclist.sort()
-        ''' begin sorting and sort the list '''
-
-                # TODO: I need to cleanup the series names and issues 1/2, 0.5, etc...
-                # TODO: Also, check for CVDB items first!
-
-        cl = {}
-        ''' temp dictionary'''
-        for key, group in groupby(comiclist, lambda x: x[SERIES]):
-                cl[key] = list(group)
-                '''groups by series'''
-                ''' cl is a dictionary that now has 'series' as keys'''
-                ''' we remove series with only one ecomic '''
-        
-        logfile.write('============= Begining dupes identification ==================================\n\n')             
-        
+        logfile.write('============= Begining dupes identification ==================================\n\n')
         logfile.write('Parsing '+str(len(comiclist))+ ' ecomics\n')
-        logfile.write('Found '+str(len(cl))+ ' different series\n')
-                
-        if options["verbose"]:
-            for series in sorted(cl.keys()):
-                            logfile.write('\t'+series+'\n')
-        
-        remove = []
-        for series in cl.keys():
-                if len(cl[series])==1:
-                                remove.append(series)   
-        for series in remove:
-                del cl[series]
-        logfile.write('Found '+str(len(cl))+ ' different series with more than one issue\n')
-                
-        if options["verbose"]:
-            for series in sorted(cl.keys()):
-                            logfile.write('\t'+series+'\n')
-        
-        ''' we now regroup each series looking for dupe issues '''
-        # We need to use a different list or sometimes python duplicates entries
-        temp_cl = {}
-        for series in cl.keys():
-                cl[series].sort()
-                temp_dict = {} 
-                for key, group in groupby(cl[series], lambda x: x[NUMBER]):
-                        temp_dict[key] = list(group)
-                temp_cl[series] = temp_dict
-        cl = temp_cl
-                
-        ''' cleaning issues without dupes '''
-        remove = []
-        for series in cl.keys():
-                for number in cl[series]:
-                        if len(cl[series][number])==1:
-                                        remove.append([series,number])
-                
-        for a in remove:
-                del cl[a[0]][a[1]]
-        
-        
-        ''' now a second go for series without issues after non-dupe removal '''
-        remove = []
-        for i in cl:
-                if len(cl[i])==0:
-                                remove.append(i)
-        for i in remove:
-                del cl[i]
 
-        logfile.write('Found '+str(len(cl))+ ' different series with dupes\n')
+        # Same ComicVine id, or same series and number (see dmGrouping.py)
+        dupe_groups = find_dupe_groups(comiclist, SERIES, NUMBER, CVDB_ID)
+
+        logfile.write('Found '+str(len(dupe_groups)) +' groups of dupes, with a total of '+ str(sum(len(g) for g in dupe_groups))+ ' ecomics.\n')
         if options["verbose"]:
-            for series in sorted(cl.keys()):
-                            logfile.write('\t'+series+'\t('+str(cl[series].keys())+')\n')
-                
-        ''' Now I have them sorted, I convert them to a simple list of lists (groups)...
-        each item in this list is a list of dupes '''
-        
-        dupe_groups = []
-        for i in cl:
-                for j in cl[i]:
-                        dupe_groups.append(cl[i][j])
-        
-        logfile.write('Found '+str(len(dupe_groups)) +' groups of dupes, with a total of '+ str(len(reduce(list.__add__, dupe_groups, [])))+ ' ecomics.\n')
-        if options["verbose"]:
-                for group in sorted(dupe_groups):
+                for group in dupe_groups:
                         logfile.write('\t'+group[0][SERIES]+' #'+group[0][NUMBER]+'\n')
                         for comic in group:
                                 logfile.write('\t\t'+comic[FILENAME]+'\n')
 
-        dupe_groups.sort()
-
         logfile.write('\n============= End of dupes identification=====================================\n\n\n\n')
         logfile.write('============= Beginning dupes processing =====================================\n\n')
-        
-        del cl
         
         #
         ##########################################################
