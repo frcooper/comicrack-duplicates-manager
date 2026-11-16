@@ -221,6 +221,14 @@ class dmBookWrapper:
 		return self.raw.FileSize
 
 	def GetCVDB_ID(self):
+		# Scrapers that keep the issue id in a custom value come first, then the
+		# CVDB tag or note that Comic Vine Scraper writes.
+		try:
+			ret = self.raw.GetCustomValue('comicvine_issue')
+		except Exception:
+			ret = None
+		if ret and ret.strip() and ret.strip() != '0':
+			return ToString(ret.strip())
 		return ToString(extract_issue_ref(self.raw))
 
 
