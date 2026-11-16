@@ -55,7 +55,6 @@ SCRIPTDIRECTORY = __file__[0:-len("constants.py")]
 # The rules file is kept outside the plugin folder, which uninstalling deletes (see dmPaths.py).
 from dmPaths import rules_paths
 RULESFILE, RULESDIRECTORY, OLDRULESFILE = rules_paths(SCRIPTDIRECTORY)
-LOGFILE = Path.Combine(DUPESDIRECTORY, "logfile.log")
 (SERIES,NUMBER,VOLUME,FILENAME,PAGECOUNT,FILESIZE,ID,CVDB_ID,FILEPATH,TAGS,NOTES,FILETYPE,SCAN,BOOK) = range(14)
 FIELD_NAMES = ['series','number','volume','filename','pages','size','id','cvdb_id','path','tags','notes','type','scan','book']
 FIELDS_TO_UPDATE_INFO = [
