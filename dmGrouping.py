@@ -21,6 +21,10 @@
 #     scraped to the plain issue's ComicVine id, so the id only joins comics
 #     whose numbers carry the same suffix;
 #   - a black and white edition only matches another black and white copy.
+# A scan of a print copy and the digital release are never duplicates: the
+# custom value Medium (Physical or Digital, set by the Data Manager rule) keeps
+# them in separate groups. A comic with no Medium can join either side, but never
+# links a Physical copy to a Digital one.
 
 import re
 
@@ -60,6 +64,13 @@ def _bw(comic):
     return '%s' % getattr(comic[-1], 'BlackAndWhite', '') == 'Yes'
 
 
+def _medium(comic):
+    '''The custom value Medium, lower case: "physical", "digital" or "" when unknown.'''
+    get = getattr(comic[-1], 'GetCustomValue', None)
+    value = get('Medium') if get else None
+    return ('%s' % (value or '')).strip().lower()
+
+
 def _name_key(comic, series_index, number_index):
     # Without a number, series alone says little (folios, artbooks and one-shots
     # filed under a folder name all share it), so the title must match too.
@@ -82,10 +93,29 @@ def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_inde
             i = parent[i]
         return i
 
+    medium = [_medium(c) for c in comics]
+
     def union(i, j):
+        '''Joins the groups of i and j unless one is Physical and the other Digital.'''
         ri, rj = find(i), find(j)
-        if ri != rj:
-            parent[ri] = rj
+        if ri == rj:
+            return True
+        if medium[ri] and medium[rj] and medium[ri] != medium[rj]:
+            return False
+        parent[ri] = rj
+        medium[rj] = medium[rj] or medium[ri]
+        return True
+
+    def join(members):
+        # Each member joins the first group it may: a Physical and a Digital copy
+        # each start their own, and later copies join the group of their medium.
+        anchors = []
+        for j in members:
+            for a in anchors:
+                if union(a, j):
+                    break
+            else:
+                anchors.append(j)
 
     ids = [_cvdb(c, cvdb_index) for c in comics]
     by_id = {}
@@ -97,8 +127,7 @@ def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_inde
         by_name.setdefault(_name_key(comic, series_index, number_index), []).append(i)
 
     for members in by_id.values():
-        for j in members[1:]:
-            union(members[0], j)
+        join(members)
 
     for members in by_name.values():
         if len(members) < 2:
@@ -107,8 +136,7 @@ def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_inde
             joined = members
         else:
             joined = [i for i in members if not ids[i]]
-        for j in joined[1:]:
-            union(joined[0], j)
+        join(joined)
 
     groups = {}
     for i in range(len(comics)):

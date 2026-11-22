@@ -8,17 +8,21 @@ from dmGrouping import find_dupe_groups  # noqa: E402
 
 
 class Book(object):
-    def __init__(self, title, bw='Unknown'):
+    def __init__(self, title, bw='Unknown', medium=None):
         self.Title = title
         self.BlackAndWhite = bw
+        self.medium = medium
+
+    def GetCustomValue(self, key):
+        return self.medium if key == 'Medium' else None
 
 
-def comic(series, number, cvdb='', name=None, title='', bw='Unknown'):
+def comic(series, number, cvdb='', name=None, title='', bw='Unknown', medium=None):
     # Same layout as the tuples ProcessDuplicates builds (constants.py):
     # SERIES, NUMBER, VOLUME, FILENAME, PAGECOUNT, FILESIZE, ID, CVDB_ID,
     # FILEPATH, TAGS, NOTES, FILETYPE, SCAN, BOOK
     name = name or '%s %s %s' % (series, number, cvdb)
-    return (series, number, '', name, 20, 1.0, name, cvdb, name, '', '', 'cbz', '', Book(title, bw))
+    return (series, number, '', name, 20, 1.0, name, cvdb, name, '', '', 'cbz', '', Book(title, bw, medium))
 
 
 def names(groups):
@@ -100,6 +104,33 @@ class FindDupeGroupsTest(unittest.TestCase):
 
     def test_unknown_and_no_count_as_colour(self):
         groups = find_dupe_groups([comic('x', '1', name='a', bw='No'), comic('x', '1', name='b')])
+        self.assertEqual(names(groups), [['a', 'b']])
+
+    def test_scan_and_digital_copy_stay_apart(self):
+        groups = find_dupe_groups([
+            comic('secret invasion', '1', '5', 'scan', medium='Physical'),
+            comic('secret invasion', '1', '5', 'digital', medium='Digital'),
+        ])
+        self.assertEqual(groups, [])
+
+    def test_same_medium_still_groups(self):
+        # Digital first: the second scan must still find the first one
+        groups = find_dupe_groups([
+            comic('x', '1', '5', 'd', medium='Digital'), comic('x', '1', '5', 'p', medium='Physical'),
+            comic('x', '1', '5', 'p2', medium=' physical '), comic('x', '1', '', 'd2', medium='Digital'),
+        ])
+        self.assertEqual(names(groups), [['d', 'd2'], ['p', 'p2']])
+
+    def test_unknown_medium_never_bridges(self):
+        # u matches both by id; it joins the first and does not link p to d
+        groups = find_dupe_groups([
+            comic('x', '1', '5', 'p', medium='Physical'), comic('x', '1', '5', 'u'),
+            comic('x', '1', '5', 'd', medium='Digital'),
+        ])
+        self.assertEqual(names(groups), [['p', 'u']])
+
+    def test_unknown_medium_groups_as_before(self):
+        groups = find_dupe_groups([comic('x', '1', name='a', medium=''), comic('x', '1', name='b')])
         self.assertEqual(names(groups), [['a', 'b']])
 
 
