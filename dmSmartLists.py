@@ -19,6 +19,8 @@
 # and language are ignored on purpose: the built-in "Only Duplicates" rule
 # compares them exactly, so a copy with a full cover date and one with only the
 # month never match.
+# A scan of a print copy and the digital release (custom value Medium) are not
+# duplicates; "Scan and digital: same issue" lists the issues held as both.
 
 import re
 
@@ -46,12 +48,12 @@ def _cv(book):
     return extract_issue_ref(book)
 
 
-def _groups(books):
+def _groups(books, split_medium=True):
     # (series key, number, ComicVine id, ComicBook): dmGrouping reads the
     # title and black and white flag from the ComicBook, the tuple's last item.
     comics = [((_series_key(b.ShadowSeries), b.ShadowVolume), b.ShadowNumber, _cv(b) or '', b)
               for b in books if b.IsLinked]
-    return [[c[-1] for c in g] for g in find_dupe_groups(comics, 0, 1, 2)]
+    return [[c[-1] for c in g] for g in find_dupe_groups(comics, 0, 1, 2, split_medium)]
 
 
 def _widest_page(book):
@@ -92,4 +94,17 @@ def DuplicateIssueExtras(books, a, b):
     for g in _groups(books):
         keep = _keeper(g)
         result.extend(x for x in g if x is not keep)
+    return result
+
+
+#@Name	Scan and digital: same issue
+#@Hook	CreateBookList
+#@PCount	0
+#@Description	Issues held both as a scan of a print copy and as a digital release (custom value Medium is Physical on one copy and Digital on another). Lists every copy of those issues. Put exclusion rules above this one.
+def ScanAndDigitalIssues(books, a, b):
+    result = []
+    for g in _groups(books, False):
+        media = set(('%s' % (x.GetCustomValue('Medium') or '')).strip().lower() for x in g)
+        if 'physical' in media and 'digital' in media:
+            result.extend(g)
     return result
