@@ -5,7 +5,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
 import dmSmartLists  # noqa: E402
-from dmSmartLists import DuplicateIssueExtras, DuplicateIssues  # noqa: E402
+from dmSmartLists import DuplicateIssueExtras, DuplicateIssues, ScanAndDigitalIssues  # noqa: E402
 
 
 class Page(object):
@@ -16,7 +16,7 @@ class Page(object):
 class Book(object):
     # Only the ComicBook members the smart-list rules read.
     def __init__(self, name, series, number, volume=-1, cv='', notes='', title='', bw='Unknown',
-                 pages=20, size=1000, widths=(), linked=True):
+                 pages=20, size=1000, widths=(), linked=True, medium=None):
         self.name = name
         self.ShadowSeries = series
         self.ShadowNumber = number
@@ -30,8 +30,11 @@ class Book(object):
         self.FileSize = size
         self.Pages = [Page(w) for w in widths]
         self.IsLinked = linked
+        self.medium = medium
 
     def GetCustomValue(self, key):
+        if key == 'Medium':
+            return self.medium
         return self.cv if key == dmSmartLists.CV_KEY else None
 
 
@@ -79,6 +82,17 @@ class SmartListTest(unittest.TestCase):
     def test_extras_fall_back_to_file_size(self):
         books = [Book('small', 'X', '1', size=10), Book('big', 'X', '1', size=99), Book('mid', 'X', '1', size=50)]
         self.assertEqual(names(DuplicateIssueExtras(books, None, None)), ['mid', 'small'])
+
+    def test_scan_and_digital_copy_are_not_duplicates(self):
+        books = [Book('p', 'X', '1', cv='5', medium='Physical'), Book('d', 'X', '1', cv='5', medium='Digital')]
+        self.assertEqual(DuplicateIssues(books, None, None), [])
+
+    def test_scan_and_digital_lists_issues_held_as_both(self):
+        books = [Book('p', 'X', '1', cv='5', medium='Physical'), Book('d', 'X', '1', medium='Digital'),
+                 Book('u', 'X', '1'),
+                 Book('p2', 'X', '2', medium='Physical'), Book('p3', 'X', '2', medium='Physical'),
+                 Book('d4', 'X', '4', medium='Digital'), Book('u4', 'X', '4')]
+        self.assertEqual(names(ScanAndDigitalIssues(books, None, None)), ['d', 'p', 'u'])
 
 
 if __name__ == '__main__':

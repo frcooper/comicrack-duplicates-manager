@@ -80,12 +80,17 @@ See [TipsAndTricks](TipsAndTricks.md) for further help! And you can check also t
 
 ## Smart-list rules ##
 
-The plugin also adds two rules for smart lists, under **User Scripts**. They group books the same way the manager does, but only list them, so you can look before anything is moved or deleted:
+The plugin also adds three rules for smart lists, under **User Scripts**. They group books the same way the manager does, but only list them, so you can look before anything is moved or deleted:
 
 - **Duplicates: same issue** lists every book that has another copy of the same issue: the same ComicVine id, or the same series, volume and number.
 - **Duplicates: extra copies only** lists the same books minus the copy to keep in each group. It keeps the scraped copy first, then the higher page resolution (when ComicRack knows it for every copy), then more pages, then the bigger file. This is a rough guide, not a quality check.
+- **Scan and digital: same issue** lists the issues you hold both as a scan of a print copy and as a digital release, with every copy of each.
 
 Cover variants (#1A, #1B, ...) are kept apart from the plain issue even when they share its ComicVine id, and a black and white edition only matches other black and white copies.
+
+A scan of a print copy and the digital release of the same issue are not duplicates. The custom value `Medium` (`Physical` or `Digital`, set by a Data Manager rule) keeps them apart, in the manager and in the first two rules. A book with no `Medium` can match either kind, but never links a scan to a digital copy.
+
+For the other views, use ComicRack's own **Custom Value** rule with the name `Medium`: *is* `Physical` for scans only, *is* `Digital` for digital releases only, and *is* left empty for books whose medium is unknown.
 
 A rule only sees the books that the rules above it let through. Put every exclusion (paths, tags, ...) above the duplicates rule, never below it: a rule below would remove one copy of a pair and leave the other on its own.
 

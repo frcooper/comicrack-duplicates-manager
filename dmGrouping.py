@@ -82,8 +82,9 @@ def _name_key(comic, series_index, number_index):
     return (comic[series_index], '', title.strip().lower(), _bw(comic))
 
 
-def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_index=CVDB_ID):
-    '''Returns a sorted list of groups (lists of comic tuples) with more than one comic.'''
+def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_index=CVDB_ID, split_medium=True):
+    '''Returns a sorted list of groups (lists of comic tuples) with more than one comic.
+    With split_medium False, a scan and a digital copy of one issue share a group.'''
     comics = list(comics)
     parent = list(range(len(comics)))
 
@@ -93,7 +94,7 @@ def find_dupe_groups(comics, series_index=SERIES, number_index=NUMBER, cvdb_inde
             i = parent[i]
         return i
 
-    medium = [_medium(c) for c in comics]
+    medium = [_medium(c) if split_medium else '' for c in comics]
 
     def union(i, j):
         '''Joins the groups of i and j unless one is Physical and the other Digital.'''
